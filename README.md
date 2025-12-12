@@ -327,14 +327,44 @@ The test suite covers:
 
 ### Manual Testing
 
+#### Bash
 ```bash
 # Test IP-based limiting (5 req/s in default config)
-for i in {1..10}; do curl -i http://localhost:8080/ | head -1; done
+for i in {1..10}; do curl -i http://localhost:8080/ | head -n 1; done
 
 # Test token-based limiting
-for i in {1..105}; do curl -i -H "API_KEY: test-token" http://localhost:8080/ | head -1; done
+for i in {1..105}; do curl -i -H "API_KEY: test-token" http://localhost:8080/ | head -n 1; done
+```
 
-# Test block duration
+#### Fish Shell
+```fish
+# Test IP-based limiting
+for i in (seq 1 10); curl -i http://localhost:8080/ | head -n 1; end
+
+# Test token-based limiting
+for i in (seq 1 105); curl -i -H "API_KEY: test-token" http://localhost:8080/ | head -n 1; end
+```
+
+#### Command Prompt (CMD)
+```cmd
+:: Test IP-based limiting
+FOR /L %i IN (1,1,10) DO curl -i http://localhost:8080/
+
+:: Test token-based limiting
+FOR /L %i IN (1,1,105) DO curl -i -H "API_KEY: test-token" http://localhost:8080/
+```
+
+#### PowerShell
+```powershell
+# Test IP-based limiting (using curl.exe to avoid alias conflict)
+1..10 | ForEach-Object { curl.exe -i http://localhost:8080/ | Select-Object -First 1 }
+
+# Test token-based limiting
+1..105 | ForEach-Object { curl.exe -i -H "API_KEY: test-token" http://localhost:8080/ | Select-Object -First 1 }
+```
+
+#### Verify Block Duration
+```bash
 curl -i http://localhost:8080/ # Should return 429 if blocked
 sleep 5
 curl -i http://localhost:8080/ # Still blocked
