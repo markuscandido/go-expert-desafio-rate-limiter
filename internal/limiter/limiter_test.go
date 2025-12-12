@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/config"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/storage"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/config"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/storage"
 )
 
 // MockStrategy is a mock implementation of storage.Strategy for testing

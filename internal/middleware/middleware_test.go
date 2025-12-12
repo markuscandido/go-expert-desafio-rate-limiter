@@ -4,11 +4,12 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/config"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/limiter"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/storage"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/config"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/limiter"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/storage"
 )
 
 type MockStorageForMiddleware struct {
@@ -98,7 +99,7 @@ func TestMiddlewareBlocksExceededRequests(t *testing.T) {
 		t.Errorf("3rd request should return 429, got %d", w.Code)
 	}
 
-	body := w.Body.String()
+	body := strings.TrimSpace(w.Body.String())
 	if body != ErrorMessage {
 		t.Errorf("Expected error message, got: %s", body)
 	}

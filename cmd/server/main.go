@@ -4,11 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/config"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/limiter"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/middleware"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/config"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/limiter"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/middleware"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/storage"
 	"github.com/markuscandido/go-expert-desafio-rate-limiter/pkg/logger"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/storage"
 )
 
 func main() {

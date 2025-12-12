@@ -1,4 +1,4 @@
-package main
+package main_test
 
 import (
 	"context"
@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/config"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/limiter"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/middleware"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/storage"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/config"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/limiter"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/middleware"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/storage"
 )
 
 // MockStorageForIntegration for integration testing

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/limiter"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/limiter"
 	"github.com/markuscandido/go-expert-desafio-rate-limiter/pkg/logger"
 )
 

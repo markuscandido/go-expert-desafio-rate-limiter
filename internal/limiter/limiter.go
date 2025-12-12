@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/config"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/config"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/storage"
 	"github.com/markuscandido/go-expert-desafio-rate-limiter/pkg/logger"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/storage"
 )
 
 type RateLimiter struct {
