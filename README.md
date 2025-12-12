@@ -49,7 +49,7 @@ Allow request to proceed
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/markuscandido/go-expert-desafio-rate-limiter.git
 cd rate-limiter
 
 # Start the services
@@ -62,14 +62,14 @@ curl -i http://localhost:8080/
 ### Manual Setup
 
 **Prerequisites:**
-- Go 1.21 or higher
+- Go 1.25 or higher
 - Redis 6.0 or higher
 
 **Installation:**
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/markuscandido/go-expert-desafio-rate-limiter.git
 cd rate-limiter
 
 # Install dependencies
