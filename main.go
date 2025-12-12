@@ -2,23 +2,30 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"net/http"
+
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/config"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/limiter"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/middleware"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/pkg/logger"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/storage"
 )
 
 func main() {
 	// Load configuration
 	cfg := config.LoadConfig()
-	fmt.Printf("Starting server with config:\n")
-	fmt.Printf("  IP Limit: %d req/s (enabled: %v)\n", cfg.MaxRequestsIP, cfg.EnableIPLimit)
-	fmt.Printf("  Token Limit: %d req/s (enabled: %v)\n", cfg.MaxRequestsToken, cfg.EnableTokenLimit)
-	fmt.Printf("  Redis: %s\n", cfg.RedisAddr)
+	logger.Info("Starting rate limiter server",
+		"maxRequestsIP", cfg.MaxRequestsIP,
+		"enableIPLimit", cfg.EnableIPLimit,
+		"maxRequestsToken", cfg.MaxRequestsToken,
+		"enableTokenLimit", cfg.EnableTokenLimit,
+		"redisAddr", cfg.RedisAddr,
+	)
 
 	// Initialize Redis storage
 	redisStrategy, err := storage.NewRedisStrategy(cfg.RedisAddr, cfg.RedisDB, cfg.RedisPass)
 	if err != nil {
-		log.Fatalf("Failed to initialize Redis: %v", err)
+		logger.Fatal("Failed to initialize Redis", "error", err)
 	}
 	defer redisStrategy.Close()
 
@@ -33,7 +40,7 @@ func main() {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"message": "Hello from github.com/markuscandido/go-expert-desafio-rate-limiter server!"}`))
+		w.Write([]byte(`{"message": "Hello from rate-limiter server!"}`))
 	})
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -47,9 +54,9 @@ func main() {
 
 	// Start server
 	addr := ":8080"
-	fmt.Printf("Server listening on %s\n", addr)
+	logger.Info("Server listening", "address", addr)
 	if err := http.ListenAndServe(addr, handler); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("Server error: %v", err)
+		logger.Fatal("Server error", "error", err)
 	}
 }
 

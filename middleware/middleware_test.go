@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -52,10 +53,6 @@ func (m *MockStorageForMiddleware) GetData(ctx context.Context, key string) (*st
 func (m *MockStorageForMiddleware) Close() error {
 	return nil
 }
-
-import (
-	"context"
-)
 
 func TestMiddlewareBlocksExceededRequests(t *testing.T) {
 	mockStorage := NewMockStorageForMiddleware()

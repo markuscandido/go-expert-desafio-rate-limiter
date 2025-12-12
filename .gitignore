@@ -35,3 +35,6 @@ docker-compose.override.yml
 
 # Dependencies
 vendor/
+
+# volume data
+.data/

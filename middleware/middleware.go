@@ -3,9 +3,11 @@ package middleware
 import (
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/markuscandido/go-expert-desafio-rate-limiter/limiter"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/pkg/logger"
 )
 
 type RateLimiterMiddleware struct {
@@ -28,16 +30,34 @@ func (m *RateLimiterMiddleware) Handler(next http.Handler) http.Handler {
 		allowed, blockDuration, err := m.limiter.AllowRequest(r.Context(), ip, token)
 
 		if err != nil {
+			logger.Error("Rate limiter error",
+				"path", r.RequestURI,
+				"ip", ip,
+				"hasToken", token != "",
+				"error", err,
+			)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
 		if !allowed {
-			w.Header().Set("Retry-After", string(rune(blockDuration)))
+			logger.Warn("Rate limit exceeded",
+				"path", r.RequestURI,
+				"ip", ip,
+				"hasToken", token != "",
+				"blockDuration", blockDuration,
+			)
+			w.Header().Set("Retry-After", strconv.Itoa(blockDuration))
 			http.Error(w, ErrorMessage, http.StatusTooManyRequests)
 			return
 		}
 
+		logger.Debug("Request allowed",
+			"path", r.RequestURI,
+			"method", r.Method,
+			"ip", ip,
+			"hasToken", token != "",
+		)
 		next.ServeHTTP(w, r)
 	})
 }

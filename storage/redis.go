@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/pkg/logger"
 )
 
 type RedisStrategy struct {
@@ -25,9 +27,17 @@ func NewRedisStrategy(addr string, db int, password string) (*RedisStrategy, err
 	defer cancel()
 
 	if err := client.Ping(ctx).Err(); err != nil {
+		logger.Error("Failed to connect to Redis",
+			"addr", addr,
+			"error", err,
+		)
 		return nil, fmt.Errorf("failed to connect to Redis: %w", err)
 	}
 
+	logger.Info("Connected to Redis",
+		"addr", addr,
+		"db", db,
+	)
 	return &RedisStrategy{client: client}, nil
 }
 
@@ -35,6 +45,10 @@ func (r *RedisStrategy) CheckAndIncrement(ctx context.Context, key string, maxRe
 	// Check if blocked
 	isBlocked, err := r.IsBlocked(ctx, key)
 	if err != nil {
+		logger.Error("Failed to check if key is blocked",
+			"key", key,
+			"error", err,
+		)
 		return false, err
 	}
 	if isBlocked {
@@ -44,6 +58,10 @@ func (r *RedisStrategy) CheckAndIncrement(ctx context.Context, key string, maxRe
 	// Get current data
 	data, err := r.GetData(ctx, key)
 	if err != nil {
+		logger.Error("Failed to get data from Redis",
+			"key", key,
+			"error", err,
+		)
 		return false, err
 	}
 
@@ -68,6 +86,10 @@ func (r *RedisStrategy) CheckAndIncrement(ctx context.Context, key string, maxRe
 	// Store updated data
 	dataJSON, err := json.Marshal(data)
 	if err != nil {
+		logger.Error("Failed to marshal data",
+			"key", key,
+			"error", err,
+		)
 		return false, err
 	}
 
@@ -78,11 +100,23 @@ func (r *RedisStrategy) CheckAndIncrement(ctx context.Context, key string, maxRe
 
 	err = r.client.Set(ctx, key, dataJSON, duration).Err()
 	if err != nil {
+		logger.Error("Failed to set data in Redis",
+			"key", key,
+			"error", err,
+		)
 		return false, err
 	}
 
 	// Check if limit exceeded
-	return data.Count <= maxRequests, nil
+	allowed = data.Count <= maxRequests
+	if !allowed {
+		logger.Debug("Rate limit threshold reached",
+			"key", key,
+			"count", data.Count,
+			"maxRequests", maxRequests,
+		)
+	}
+	return allowed, nil
 }
 
 func (r *RedisStrategy) IsBlocked(ctx context.Context, key string) (blocked bool, err error) {
@@ -101,16 +135,42 @@ func (r *RedisStrategy) IsBlocked(ctx context.Context, key string) (blocked bool
 func (r *RedisStrategy) Block(ctx context.Context, key string, durationSeconds int) error {
 	blockedKey := key + ":blocked"
 	duration := time.Duration(durationSeconds) * time.Second
-	return r.client.Set(ctx, blockedKey, "true", duration).Err()
+	err := r.client.Set(ctx, blockedKey, "true", duration).Err()
+	if err != nil {
+		logger.Error("Failed to block key",
+			"key", key,
+			"durationSeconds", durationSeconds,
+			"error", err,
+		)
+		return err
+	}
+	logger.Debug("Key blocked",
+		"key", key,
+		"durationSeconds", durationSeconds,
+	)
+	return nil
 }
 
 func (r *RedisStrategy) Reset(ctx context.Context, key string) error {
 	err := r.client.Del(ctx, key).Err()
 	if err != nil {
+		logger.Error("Failed to reset key",
+			"key", key,
+			"error", err,
+		)
 		return err
 	}
 	blockedKey := key + ":blocked"
-	return r.client.Del(ctx, blockedKey).Err()
+	err = r.client.Del(ctx, blockedKey).Err()
+	if err != nil {
+		logger.Error("Failed to reset blocked key",
+			"key", blockedKey,
+			"error", err,
+		)
+		return err
+	}
+	logger.Debug("Key reset", "key", key)
+	return nil
 }
 
 func (r *RedisStrategy) GetData(ctx context.Context, key string) (*LimiterData, error) {
@@ -132,5 +192,6 @@ func (r *RedisStrategy) GetData(ctx context.Context, key string) (*LimiterData, 
 }
 
 func (r *RedisStrategy) Close() error {
+	logger.Info("Closing Redis connection")
 	return r.client.Close()
 }

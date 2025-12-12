@@ -203,3 +203,48 @@ func TestDisabledLimits(t *testing.T) {
 		}
 	}
 }
+
+func TestIPsAreIndependent_AfterBlock(t *testing.T) {
+	mockStorage := NewMockStrategy()
+	cfg := &config.RateLimiterConfig{
+		MaxRequestsIP:    2,
+		BlockDurationIP:  60,
+		EnableIPLimit:    true,
+		EnableTokenLimit: false,
+	}
+
+	rateLimiter := NewRateLimiter(mockStorage, cfg)
+	ctx := context.Background()
+
+	ip1 := "192.168.1.1"
+	ip2 := "192.168.1.2"
+
+	// First 2 requests from IP1 should be allowed
+	for i := 0; i < 2; i++ {
+		allowed, _, err := rateLimiter.AllowRequest(ctx, ip1, "")
+		if err != nil {
+			t.Errorf("Expected no error, got %v", err)
+		}
+		if !allowed {
+			t.Errorf("IP1 Request %d should be allowed", i+1)
+		}
+	}
+
+	// 3rd request from IP1 should be blocked
+	allowed, _, err := rateLimiter.AllowRequest(ctx, ip1, "")
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if allowed {
+		t.Error("IP1 3rd request should be blocked")
+	}
+
+	// Request from IP2 should be allowed, as it is independent
+	allowed, _, err = rateLimiter.AllowRequest(ctx, ip2, "")
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if !allowed {
+		t.Error("Request from IP2 should be allowed as it is independent")
+	}
+}

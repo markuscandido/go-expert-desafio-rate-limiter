@@ -11,6 +11,7 @@ A high-performance rate limiter middleware for Go web servers that supports limi
 - **Strategy Pattern**: Easy to swap Redis with other storage backends
 - **Middleware Integration**: Can be easily integrated with any Go HTTP server
 - **Environment Configuration**: Configure via `.env` file or environment variables
+- **Structured Logging**: JSON-based structured logs for better observability and debugging
 - **Docker Support**: Includes docker-compose for quick setup
 
 ## Architecture
@@ -21,7 +22,8 @@ A high-performance rate limiter middleware for Go web servers that supports limi
 2. **Storage Layer** (`storage/`): Defines the strategy interface and Redis implementation
 3. **Limiter Logic** (`limiter/`): Core rate limiting logic
 4. **Middleware** (`middleware/`): HTTP middleware for easy integration
-5. **Example Server** (`main.go`): Sample web server with rate limiting
+5. **Logger** (`pkg/logger/`): Centralized structured logging with JSON output for observability
+6. **Example Server** (`main.go`): Sample web server with rate limiting
 
 ### Flow
 
@@ -164,12 +166,12 @@ package main
 
 import (
 	"net/http"
-	"log"
 
-	"rate-limiter/config"
-	"rate-limiter/limiter"
-	"rate-limiter/middleware"
-	"rate-limiter/storage"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/config"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/limiter"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/middleware"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/pkg/logger"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/storage"
 )
 
 func main() {
@@ -183,7 +185,7 @@ func main() {
 		cfg.RedisPass,
 	)
 	if err != nil {
-		log.Fatalf("Failed to initialize Redis: %v", err)
+		logger.Fatal("Failed to initialize Redis", "error", err)
 	}
 	defer redisStrategy.Close()
 
@@ -203,7 +205,10 @@ func main() {
 	handler := rateLimiterMiddleware.Handler(mux)
 
 	// Start server
-	log.Fatal(http.ListenAndServe(":8080", handler))
+	logger.Info("Server listening", "address", ":8080")
+	if err := http.ListenAndServe(":8080", handler); err != nil && err != http.ErrServerClosed {
+		logger.Fatal("Server error", "error", err)
+	}
 }
 ```
 
@@ -232,6 +237,68 @@ Then use it instead of Redis:
 customStorage := storage.NewCustomStrategy()
 rateLimiter := limiter.NewRateLimiter(customStorage, cfg)
 ```
+
+## Logging
+
+The project uses structured JSON logging for better observability, debugging, and integration with monitoring platforms.
+
+### Log Levels
+
+- **DEBUG**: Detailed diagnostic information for development
+- **INFO**: Important application events (startup, connections, operations)
+- **WARN**: Warning messages for unusual but recoverable situations
+- **ERROR**: Error messages for recoverable errors
+- **FATAL**: Critical errors that stop the application
+
+### Using the Logger
+
+```go
+import "github.com/markuscandido/go-expert-desafio-rate-limiter/pkg/logger"
+
+// Info level - Application events
+logger.Info("User action", "userID", user.ID, "action", "login", "ip", r.RemoteAddr)
+
+// Warn level - Unusual situations
+logger.Warn("Rate limit exceeded", "ip", "192.168.1.1", "blockDuration", 60)
+
+// Error level - Recoverable errors
+logger.Error("Database connection failed", "error", err, "retries", 3)
+
+// Debug level - Diagnostic information
+logger.Debug("Processing request", "id", requestID, "method", "GET")
+
+// Fatal level - Critical errors
+logger.Fatal("Configuration invalid", "error", err)
+```
+
+### Example Log Output
+
+```json
+{
+  "time": "2024-12-11T10:30:45.123456789Z",
+  "level": "WARN",
+  "msg": "Rate limit exceeded",
+  "ip": "192.168.1.1",
+  "blockDuration": 60
+}
+```
+
+### Logging Documentation
+
+For comprehensive logging documentation and examples, see:
+- [docs/LOGGING.md](docs/LOGGING.md) - Technical overview and implementation details
+- [docs/LOG_EXAMPLES.md](docs/LOG_EXAMPLES.md) - 20+ practical logging examples
+- [docs/LOGGING_GUIDE.md](docs/LOGGING_GUIDE.md) - Step-by-step usage guide
+- [LOGGING_SUMMARY.md](LOGGING_SUMMARY.md) - Executive summary of logging implementation
+
+### Integration with Observability Tools
+
+The structured JSON logs work seamlessly with:
+- **DataDog**: Automatic field extraction
+- **Grafana Loki**: Label-based filtering
+- **Elastic Stack**: Field indexing
+- **CloudWatch**: Pattern matching
+- **Splunk**: Advanced search capabilities
 
 ## Testing
 

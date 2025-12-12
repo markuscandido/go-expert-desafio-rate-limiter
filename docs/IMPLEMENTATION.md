@@ -48,6 +48,22 @@
 
 ## Key Components
 
+### 1. Config Layer (`config/`)
+
+The configuration layer loads settings from environment variables with defaults:
+
+**Features**:
+- Environment-based configuration
+- Type-safe configuration struct
+- Sensible defaults for all values
+- Structured logging of configuration loading
+
+**Files**:
+- `config.go`: Configuration struct and defaults
+- `loader.go`: Environment variable loading with structured logging
+
+### 2. Middleware (`middleware/`)
+
 ### 1. Configuration (config/)
 
 **Purpose**: Load and validate configuration from environment variables.
@@ -221,17 +237,40 @@ SET <identifier>:blocked "true" EX <duration>
 - **Redis**: Atomic operations ensure consistency
 - **No shared mutable state**: Each identifier tracked independently
 
+### Logging Layer (`pkg/logger/`)
+
+Centralized structured logging system using JSON format for better observability.
+
+**Features**:
+- JSON-based structured logging
+- Five log levels: DEBUG, INFO, WARN, ERROR, FATAL
+- Automatic timestamps in ISO 8601 format
+- Key-value context pairs for better debugging
+- Easy integration with observability tools (DataDog, Grafana, ELK Stack)
+
+**Usage**:
+```go
+import "github.com/markuscandido/go-expert-desafio-rate-limiter/pkg/logger"
+
+logger.Info("Operation completed", "duration", 150, "items", 42)
+logger.Error("Connection failed", "error", err, "retries", 3)
+```
+
+For more details, see [LOGGING.md](LOGGING.md) and [LOG_EXAMPLES.md](LOG_EXAMPLES.md).
+
 ## Error Handling
 
 ### Storage Errors
-- Connection errors logged and propagated
+- Connection errors logged with context via structured logging
 - Failed requests return error instead of allowing/blocking
-- Caller should handle gracefully (e.g., log and continue)
+- Caller should handle gracefully with appropriate logging
+- Structured logs include error details for better debugging
 
 ### Configuration Errors
-- Invalid numbers logged as warnings
+- Invalid numbers logged as warnings with context
 - Defaults used as fallback
 - Application continues running
+- All configuration loading is tracked with structured logs
 
 ## Performance Characteristics
 

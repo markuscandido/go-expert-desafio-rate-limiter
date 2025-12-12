@@ -1,10 +1,10 @@
-package main
+package config
 
 type RateLimiterConfig struct {
 	// IP-based rate limiting
-	MaxRequestsIP    int // Maximum requests per second from a single IP
-	BlockDurationIP  int // Block duration in seconds for IP
-	EnableIPLimit    bool
+	MaxRequestsIP   int // Maximum requests per second from a single IP
+	BlockDurationIP int // Block duration in seconds for IP
+	EnableIPLimit   bool
 
 	// Token-based rate limiting
 	MaxRequestsToken   int // Maximum requests per second for a token

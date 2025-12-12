@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/markuscandido/go-expert-desafio-rate-limiter/config"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/pkg/logger"
 	"github.com/markuscandido/go-expert-desafio-rate-limiter/storage"
 )
 
@@ -63,10 +64,18 @@ func (rl *RateLimiter) checkIPLimit(ctx context.Context, ip string) (*RequestLim
 	// Check if blocked
 	isBlocked, err := rl.storage.IsBlocked(ctx, key)
 	if err != nil {
+		logger.Error("Failed to check if IP is blocked",
+			"ip", ip,
+			"error", err,
+		)
 		return nil, err
 	}
 
 	if isBlocked {
+		logger.Warn("IP blocked",
+			"ip", ip,
+			"blockDuration", rl.config.BlockDurationIP,
+		)
 		return &RequestLimit{
 			Allowed:       false,
 			BlockDuration: rl.config.BlockDurationIP,
@@ -76,6 +85,10 @@ func (rl *RateLimiter) checkIPLimit(ctx context.Context, ip string) (*RequestLim
 	// Check and increment
 	allowed, err := rl.storage.CheckAndIncrement(ctx, key, rl.config.MaxRequestsIP, 1)
 	if err != nil {
+		logger.Error("Failed to check and increment IP limit",
+			"ip", ip,
+			"error", err,
+		)
 		return nil, err
 	}
 
@@ -83,8 +96,17 @@ func (rl *RateLimiter) checkIPLimit(ctx context.Context, ip string) (*RequestLim
 		// Block the IP
 		err = rl.storage.Block(ctx, key, rl.config.BlockDurationIP)
 		if err != nil {
+			logger.Error("Failed to block IP",
+				"ip", ip,
+				"blockDuration", rl.config.BlockDurationIP,
+				"error", err,
+			)
 			return nil, err
 		}
+		logger.Warn("IP rate limit exceeded",
+			"ip", ip,
+			"blockDuration", rl.config.BlockDurationIP,
+		)
 		return &RequestLimit{
 			Allowed:       false,
 			BlockDuration: rl.config.BlockDurationIP,
@@ -107,10 +129,16 @@ func (rl *RateLimiter) checkTokenLimit(ctx context.Context, token string) (*Requ
 	// Check if blocked
 	isBlocked, err := rl.storage.IsBlocked(ctx, key)
 	if err != nil {
+		logger.Error("Failed to check if token is blocked",
+			"error", err,
+		)
 		return nil, err
 	}
 
 	if isBlocked {
+		logger.Warn("Token blocked",
+			"blockDuration", rl.config.BlockDurationToken,
+		)
 		return &RequestLimit{
 			Allowed:       false,
 			BlockDuration: rl.config.BlockDurationToken,
@@ -120,6 +148,9 @@ func (rl *RateLimiter) checkTokenLimit(ctx context.Context, token string) (*Requ
 	// Check and increment
 	allowed, err := rl.storage.CheckAndIncrement(ctx, key, rl.config.MaxRequestsToken, 1)
 	if err != nil {
+		logger.Error("Failed to check and increment token limit",
+			"error", err,
+		)
 		return nil, err
 	}
 
@@ -127,8 +158,15 @@ func (rl *RateLimiter) checkTokenLimit(ctx context.Context, token string) (*Requ
 		// Block the token
 		err = rl.storage.Block(ctx, key, rl.config.BlockDurationToken)
 		if err != nil {
+			logger.Error("Failed to block token",
+				"blockDuration", rl.config.BlockDurationToken,
+				"error", err,
+			)
 			return nil, err
 		}
+		logger.Warn("Token rate limit exceeded",
+			"blockDuration", rl.config.BlockDurationToken,
+		)
 		return &RequestLimit{
 			Allowed:       false,
 			BlockDuration: rl.config.BlockDurationToken,

@@ -76,7 +76,7 @@ lint:
 # Docker
 docker-build:
 	@echo "Building Docker image..."
-	docker build -t rate-limiter:latest .
+	docker build -t markuscandido/rate-limiter-go:latest .
 	@echo "Build complete!"
 
 docker-up: docker-build

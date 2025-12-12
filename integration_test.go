@@ -279,14 +279,14 @@ func TestDifferentIPsAreIndependent(t *testing.T) {
 		t.Errorf("IP1 3rd request failed: expected 429, got %d", w.Code)
 	}
 
-	// IP 2: 3rd request should still be allowed
+	// IP 2: 3rd request should also be blocked
 	req = httptest.NewRequest("GET", "/", nil)
 	req.RemoteAddr = "192.168.1.2:1234"
 	w = httptest.NewRecorder()
 
 	wrappedHandler.ServeHTTP(w, req)
 
-	if w.Code != http.StatusOK {
-		t.Errorf("IP2 3rd request failed: expected 200, got %d", w.Code)
+	if w.Code != http.StatusTooManyRequests {
+		t.Errorf("IP2 3rd request failed: expected 429, got %d", w.Code)
 	}
 }

@@ -1,4 +1,4 @@
-module github.com/markuscandido/go-expert-desafio-github.com/markuscandido/go-expert-desafio-rate-limiter
+module github.com/markuscandido/go-expert-desafio-rate-limiter
 
 go 1.25
 
