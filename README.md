@@ -49,7 +49,7 @@ Allow request to proceed
 
 ```bash
 # Clone the repository
-git clone https://github.com/markuscandido/go-expert-desafio-rate-limiter.git
+git clone https://github.com/markuscandido/go-expert-desafio-rate-limiter.git rate-limiter
 cd rate-limiter
 
 # Start the services
@@ -69,7 +69,7 @@ curl -i http://localhost:8080/
 
 ```bash
 # Clone the repository
-git clone https://github.com/markuscandido/go-expert-desafio-rate-limiter.git
+git clone https://github.com/markuscandido/go-expert-desafio-rate-limiter.git rate-limiter
 cd rate-limiter
 
 # Install dependencies
