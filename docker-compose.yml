@@ -12,23 +12,23 @@ services:
       timeout: 3s
       retries: 5
 
-  # rate-limiter:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: rate-limiter-app
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     redis:
-  #       condition: service_healthy
-  #   environment:
-  #     RATE_LIMITER_ENABLE_IP: "true"
-  #     RATE_LIMITER_MAX_REQUESTS_IP: "5"
-  #     RATE_LIMITER_BLOCK_DURATION_IP: "60"
-  #     RATE_LIMITER_ENABLE_TOKEN: "true"
-  #     RATE_LIMITER_MAX_REQUESTS_TOKEN: "100"
-  #     RATE_LIMITER_BLOCK_DURATION_TOKEN: "60"
-  #     REDIS_ADDR: "redis:6379"
-  #     REDIS_DB: "0"
-  #   restart: unless-stopped
+  rate-limiter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rate-limiter-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      RATE_LIMITER_ENABLE_IP: "true"
+      RATE_LIMITER_MAX_REQUESTS_IP: "10"
+      RATE_LIMITER_BLOCK_DURATION_IP: "10"
+      RATE_LIMITER_ENABLE_TOKEN: "true"
+      RATE_LIMITER_MAX_REQUESTS_TOKEN: "100"
+      RATE_LIMITER_BLOCK_DURATION_TOKEN: "50"
+      REDIS_ADDR: "redis:6379"
+      REDIS_DB: "0"
+    restart: unless-stopped
