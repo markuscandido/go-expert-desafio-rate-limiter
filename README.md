@@ -18,12 +18,12 @@ A high-performance rate limiter middleware for Go web servers that supports limi
 
 ### Components
 
-1. **Config Layer** (`config/`): Loads configuration from environment variables
-2. **Storage Layer** (`storage/`): Defines the strategy interface and Redis implementation
-3. **Limiter Logic** (`limiter/`): Core rate limiting logic
-4. **Middleware** (`middleware/`): HTTP middleware for easy integration
-5. **Logger** (`pkg/logger/`): Centralized structured logging with JSON output for observability
-6. **Example Server** (`main.go`): Sample web server with rate limiting
+1.  **Config Layer** (`internal/config/`): Loads configuration from environment variables
+2.  **Storage Layer** (`internal/storage/`): Defines the strategy interface and Redis implementation
+3.  **Limiter Logic** (`internal/limiter/`): Core rate limiting logic
+4.  **Middleware** (`internal/middleware/`): HTTP middleware for easy integration
+5.  **Logger** (`pkg/logger/`): Centralized structured logging with JSON output for observability
+6.  **Example Server** (`cmd/server/main.go`): Sample web server with rate limiting
 
 ### Flow
 
@@ -167,11 +167,11 @@ package main
 import (
 	"net/http"
 
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/config"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/limiter"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/middleware"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/config"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/limiter"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/middleware"
 	"github.com/markuscandido/go-expert-desafio-rate-limiter/pkg/logger"
-	"github.com/markuscandido/go-expert-desafio-rate-limiter/storage"
+	"github.com/markuscandido/go-expert-desafio-rate-limiter/internal/storage"
 )
 
 func main() {

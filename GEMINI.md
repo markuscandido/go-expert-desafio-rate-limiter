@@ -27,7 +27,7 @@ The recommended way to run the project is using Docker Compose.
 
 **Prerequisites:**
 
-*   Go 1.21 or higher
+*   Go 1.25 or higher
 *   Redis 6.0 or higher
 
 **Installation and Running:**
@@ -67,8 +67,8 @@ The project includes a `Makefile` with several useful commands:
 
 # Development Conventions
 
-*   **Configuration:** Configuration is managed through environment variables or a `.env` file. The `config` package is responsible for loading the configuration.
-*   **Storage:** The project uses a strategy pattern for storage, making it easy to swap out the storage backend. The default implementation uses Redis.
+*   **Configuration:** Configuration is managed through environment variables or a `.env` file. The `internal/config` package is responsible for loading the configuration.
+*   **Storage:** The project uses a strategy pattern for storage, making it easy to swap out the storage backend. The default implementation uses Redis and is located in `internal/storage`.
 *   **Logging:** Structured JSON logging is used for better observability. The `pkg/logger` package provides the logging functionality.
 *   **Testing:** The project has unit and integration tests. Tests can be run using the `go test` command or the `make test` command.
-*   **Middleware:** The rate-limiting functionality is implemented as an HTTP middleware, making it easy to integrate with any Go web server.
+*   **Middleware:** The rate-limiting functionality is implemented as an HTTP middleware in `internal/middleware`, making it easy to integrate with any Go web server.
